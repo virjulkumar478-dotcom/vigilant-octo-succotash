@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Photo Profile Gallery</title>
+  <style>
+    :root{
+      --bg:#0f1115; --card:#171922; --muted:#a7b0c0; --text:#e7ebf2; --accent:#4ea6ff;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    header{padding:20px 16px;text-align:center}
+    header h1{margin:0;font-size:clamp(22px,3vw,30px)}
+    .grid{
+      display:grid;gap:14px;
+      grid-template-columns:repeat(auto-fill,minmax(210px,1fr));
+      padding:16px;max-width:1100px;margin:0 auto 80px;
+    }
+    .card{position:relative;border-radius:14px;overflow:hidden;background:var(--card);cursor:pointer;outline:none;border:1px solid #23283a}
+    .card img{width:100%;height:290px;object-fit:cover;display:block;filter:saturate(1.05)}
+    .badge{
+      position:absolute;top:8px;left:8px;
+      background:rgba(15,17,21,.75);backdrop-filter:blur(6px);
+      padding:6px 10px;border-radius:999px;font-size:13px;border:1px solid #2a2f44
+    }
+    .overlay{
+      position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55),transparent 60%);
+      opacity:0;transition:opacity .25s ease;
+    }
+    .card:hover .overlay{opacity:1}
+    .title{
+      position:absolute;bottom:10px;left:12px;right:12px;font-weight:600;
+      text-shadow:0 2px 10px rgba(0,0,0,.6)
+    }
+
+    /* Modal */
+    .modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.56);padding:18px;z-index:50}
+    .modal.open{display:grid}
+    .sheet{
+      width:min(920px,100%);background:#0e1118;border:1px solid #23283a;border-radius:18px;overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,.45)
+    }
+    .sheet .hero{width:100%;max-height:480px;display:block;object-fit:cover}
+    .content{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;padding:16px}
+    @media (max-width:800px){.content{grid-template-columns:1fr}}
+    .panel{background:#101523;border:1px solid #23283a;border-radius:14px;padding:14px}
+    .panel h3{margin:4px 0 8px;font-size:18px}
+    .panel p{margin:8px 0;color:var(--muted);line-height:1.5}
+    .list{margin:4px 0 0;padding-left:18px;color:var(--muted)}
+    .chiprow{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+    .chip{border:1px solid #2a2f44;border-radius:999px;padding:6px 10px;font-size:13px;color:var(--muted)}
+
+    /* Floating WhatsApp button */
+    .wa{
+      position:fixed;right:18px;bottom:18px;background:#27d366;color:white;
+      border:none;border-radius:999px;padding:14px 18px;font-weight:700;
+      text-decoration:none;box-shadow:0 10px 24px rgba(0,0,0,.25)
+    }
+    .wa span{opacity:.9}
+    footer{color:#7c86a0;text-align:center;font-size:12px;padding:22px}
+    a{color:var(--accent)}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Profile Gallery</h1>
+    <p style="color:#a7b0c0;margin:6px 0 0">Click any photo to view details.</p>
+  </header>
+
+  <!-- Gallery -->
+  <main class="grid" id="gallery">
+    <!-- Cards are populated by JavaScript below -->
+  </main>
+
+  <!-- Modal -->
+  <section class="modal" id="modal" aria-hidden="true" role="dialog">
+    <article class="sheet" role="document">
+      <img id="modalImg" class="hero" alt="">
+      <div class="content">
+        <div class="panel">
+          <h3 id="modalTitle">ABOUT ME</h3>
+          <p id="modalAbout">
+            Hi! I’m <strong>Rubby</strong> from Lucknow, Uttar Pradesh, India.  
+            I’m friendly, punctual, and available for professional, respectful meet-ups and photo collaborations.
+          </p>
+          <div class="chiprow" id="modalTags"></div>
+        </div>
+        <div class="panel">
+          <h3>Availability & Contact</h3>
+          <p id="modalInfo">
+            21 • Ahmedabad • Available 24/7.  
+            Please reach out on WhatsApp for bookings and questions.
+          </p>
+          <p><a id="waLink" href="https://wa.me/916206085383" target="_blank" rel="noopener">Message on WhatsApp</a></p>
+          <ul class="list" id="modalNotes">
+            <li>Only professional, respectful communication.</li>
+            <li>No explicit or illegal requests.</li>
+          </ul>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Floating WhatsApp Button -->
+  <a class="wa" href="https://wa.me/916206085383" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+    <span>Chat on WhatsApp</span>
+  </a>
+
+  <footer>© 2025 Your Name. Keep your content lawful and respectful.</footer>
+
+  <script>
+    // ====== CONFIGURE YOUR PHOTOS & SAFE CAPTIONS HERE ======
+    // Replace the image paths with yours (e.g., "images/pic1.jpg").
+    const profiles = [
+      {
+        src: "images/pic1.jpg",
+        topCaption: "21 years • Ahmedabad",
+        title: "ABOUT ME",
+        about: "I am Rubby, from Lucknow (UP). I enjoy meeting new people and doing creative photo shoots. Friendly and easy-going.",
+        tags: ["Creative", "Punctual", "Respectful"],
+        infoLine: "All-India travel • Available 24/7 • Safe & professional",
+        notes: ["Bring a govt. ID for check-in if required.", "Bookings via WhatsApp only."]
+      },
+      {
+        src: "images/pic2.jpg",
+        topCaption: "21 years • Ahmedabad",
+        title: "ABOUT ME",
+        about: "Positive, reliable, and camera-confident. Let’s plan a classy, memorable experience.",
+        tags: ["Classy", "Confident"],
+        infoLine: "Ahmedabad based • Same-day available",
+        notes: ["No explicit requests.", "Be on time, please."]
+      },
+      {
+        src: "images/pic3.jpg",
+        topCaption: "21 years • Ahmedabad",
+        title: "ABOUT ME",
+        about: "Down-to-earth and professional. I value courtesy and clear communication.",
+        tags: ["Professional", "Polite"],
+        infoLine: "Available for events and shoots",
+        notes: ["Advance confirmation by message.", "Travel possible."]
+      },
+      {
+        src: "images/pic4.jpg",
+        topCaption: "21 years • Ahmedabad",
+        title: "ABOUT ME",
+        about: "Open to collaborations that are tasteful and respectful.",
+        tags: ["Tasteful", "Friendly"],
+        infoLine: "Safe & secure meetings only",
+        notes: ["Venue must be safe and legal.", "No photography without consent."]
+      },
+      {
+        src: "images/pic5.jpg",
+        topCaption: "21 years • Ahmedabad",
+        title: "ABOUT ME",
+        about: "Let’s keep it simple: polite messages, clear plans, great time.",
+        tags: ["Simple", "Direct"],
+        infoLine: "24/7 messaging • Limited same-day slots",
+        notes: ["Deposit may be required for travel.", "Reschedule with notice."]
+      }
+    ];
+
+    const gallery = document.getElementById("gallery");
+    const modal = document.getElementById("modal");
+    const modalImg = document.getElementById("modalImg");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalAbout = document.getElementById("modalAbout");
+    const modalTags = document.getElementById("modalTags");
+    const modalInfo = document.getElementById("modalInfo");
+    const modalNotes = document.getElementById("modalNotes");
+    const waLink = document.getElementById("waLink");
+
+    // Build cards
+    profiles.forEach((p, i) => {
+      const card = document.createElement("button");
+      card.className = "card";
+      card.setAttribute("aria-label","Open profile "+(i+1));
+      card.innerHTML = `
+        <span class="badge">${p.topCaption}</span>
+        <img src="${p.src}" alt="Profile ${i+1}">
+        <div class="overlay"></div>
+        <div class="title">Click to view details</div>
+      `;
+      card.addEventListener("click", () => openModal(p));
+      gallery.appendChild(card);
+    });
+
+    function openModal(p){
+      modalImg.src = p.src;
+      modalImg.alt = "Profile photo";
+      modalTitle.textContent = p.title || "ABOUT ME";
+      modalAbout.textContent = p.about || "";
+      modalTags.innerHTML = "";
+      (p.tags||[]).forEach(t=>{
+        const chip=document.createElement("span");
+        chip.className="chip"; chip.textContent=t; modalTags.appendChild(chip);
+      });
+      modalInfo.textContent = p.infoLine || "";
+      modalNotes.innerHTML = "";
+      (p.notes||[]).forEach(n=>{
+        const li=document.createElement("li"); li.textContent=n; modalNotes.appendChild(li);
+      });
+      waLink.href = "https://wa.me/916206085383";
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden","false");
+    }
+
+    // close modal on background click / escape
+    modal.addEventListener("click", (e)=>{
+      if(e.target === modal){ closeModal(); }
+    });
+    document.addEventListener("keydown", (e)=>{
+      if(e.key === "Escape") closeModal();
+    });
+    function closeModal(){
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden","true");
+      modalImg.src="";
+    }
+  </script>
+</body>
+</html>
